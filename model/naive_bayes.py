@@ -65,18 +65,18 @@ X_train, X_test, y_train, y_test = train_test_split(
 model.fit(X_train, y_train)
 
 # Save artifacts
-joblib.dump(model, "naive_bayes_pipeline.joblib")
-joblib.dump(label_encoder, "target_label_encoder.joblib")
+joblib.dump(model, "data/naive_bayes_pipeline.joblib")
+joblib.dump(label_encoder, "data/target_label_encoder.joblib")
 
 # Save train/test splits
-X_train.to_csv("X_train.csv", index=False)
-X_test.to_csv("X_test.csv", index=False)
+X_train.to_csv("data/X_train.csv", index=False)
+X_test.to_csv("data/X_test.csv", index=False)
 
-pd.DataFrame({"anomalous": y_train}).to_csv("y_train.csv", index=False)
-pd.DataFrame({"anomalous": y_test}).to_csv("y_test.csv", index=False)
+pd.DataFrame({"anomalous": y_train}).to_csv("data/y_train.csv", index=False)
+pd.DataFrame({"anomalous": y_test}).to_csv("data/y_test.csv", index=False)
 
 print("Model training complete.")
 print("Saved:")
-print("- naive_bayes_pipeline.joblib")
-print("- target_label_encoder.joblib")
-print("- X_train.csv, X_test.csv, y_train.csv, y_test.csv")
+print("- data/naive_bayes_pipeline.joblib")
+print("- data/target_label_encoder.joblib")
+print("- data/X_train.csv, data/X_test.csv, data/y_train.csv, data/y_test.csv")
