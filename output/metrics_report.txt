@@ -1,0 +1,19 @@
+
+   Naive Bayes — Evaluation Metrics
+      Accuracy          : 0.9557
+      Precision         : 0.6197
+      Recall            : 0.5789
+      F1 Score          : 0.5986
+      ROC-AUC           : 0.9415
+      Avg Precision (PR): 0.6596
+
+- Per-class report -
+              precision    recall  f1-score   support
+
+          no       0.97      0.98      0.98      3772
+         yes       0.62      0.58      0.60       228
+
+    accuracy                           0.96      4000
+   macro avg       0.80      0.78      0.79      4000
+weighted avg       0.95      0.96      0.96      4000
+
