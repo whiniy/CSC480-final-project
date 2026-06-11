@@ -1,5 +1,5 @@
 
-   Naive Bayes — Evaluation Metrics
+   Naive Bayes Evaluation Metrics
       Accuracy          : 0.9557
       Precision         : 0.6197
       Recall            : 0.5789

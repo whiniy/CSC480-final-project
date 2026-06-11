@@ -1,0 +1,20 @@
+
+Hierarchical Bayesian Logistic Regression Evaluation Metrics
+   Decision Threshold : 0.25
+   Accuracy           : 0.9540
+   Precision          : 0.5853
+   Recall             : 0.6623
+   F1 Score           : 0.6214
+   ROC-AUC            : 0.9437
+   Avg Precision (PR) : 0.6654
+
+- Per-class report -
+              precision    recall  f1-score   support
+
+          no       0.98      0.97      0.98      3772
+         yes       0.59      0.66      0.62       228
+
+    accuracy                           0.95      4000
+   macro avg       0.78      0.82      0.80      4000
+weighted avg       0.96      0.95      0.96      4000
+
