@@ -65,4 +65,7 @@ V19: 2496.47
 V20: 2693.81
 
 pyroppl
+- Hierarchical Bayesian Model - different groups have their own risk patterns while still sharing information
+- Bayesian Logistic Regression - weights as probability distributions
+
 from scratch
