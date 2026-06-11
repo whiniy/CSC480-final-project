@@ -1,7 +1,6 @@
 # CSC480-final-project
 This is an AI model used to score the risk of accounting transactions and probability of fraud.
 
-
 Ideas:
 - fraud risk scoring system to audit triage where we compare interpretable Bayesian model against stronger black-box models
 
@@ -39,9 +38,6 @@ probability:
    - confusion matrix
    - etc
 
-- define fake audit cost system for True Negative, False Positive, False Negative, True Positive
-- compare models by expected ML metrics AND financial cost
-
 Transaction means for each vendor:
 V01: 2931.31
 V02: 3114.88
@@ -67,5 +63,3 @@ V20: 2693.81
 pyroppl
 - Hierarchical Bayesian Model - different groups have their own risk patterns while still sharing information
 - Bayesian Logistic Regression - weights as probability distributions
-
-from scratch
