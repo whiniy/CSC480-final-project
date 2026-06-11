@@ -1,0 +1,12 @@
+Bayesian Network Metrics
+------------------------
+Accuracy: 0.9585
+Precision: 0.6782
+Recall: 0.5175
+F1-score: 0.5871
+ROC-AUC: 0.8974
+PR-AUC: 0.5677
+
+Confusion Matrix:
+[[3716   56]
+ [ 110  118]]

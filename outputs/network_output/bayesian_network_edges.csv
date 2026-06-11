@@ -1,0 +1,13 @@
+parent,child
+new_vendor,missing_po
+new_vendor,anomalous
+missing_po,anomalous
+manual_entry,entered_after_hrs
+manual_entry,duplicate_entry
+manual_entry,desc_quality
+manual_entry,anomalous
+entered_after_hrs,anomalous
+duplicate_entry,anomalous
+desc_quality,anomalous
+amt_deviation,anomalous
+unusual_accts,anomalous
