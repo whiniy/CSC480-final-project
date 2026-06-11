@@ -2,8 +2,9 @@
 bayesian network: models dependence among red flags
 
 does not assume all red flags are independent
-creates relationships between red flags:
-   new_vendor -> missing_po
+creates relationships between red flags
+some examples:
+    new_vendor -> missing_po
    entered_after_hrs -> manual_entry
    manual_entry -> duplicate_entry
    manual_entry -> desc_quality
@@ -38,12 +39,11 @@ except ImportError:
     except ImportError as exc:
         raise ImportError(
             "pgmpy is not installed. Install it with:\n\n"
-            "    pip install pgmpy\n"
+            "pip install pgmpy\n"
         ) from exc
 
 from pgmpy.estimators import BayesianEstimator
 from pgmpy.inference import VariableElimination
-
 
 # paths
 X_TRAIN_PATH = "data/X_train.csv"
@@ -60,18 +60,9 @@ os.makedirs(DATA_DIR, exist_ok=True)
 
 # helper functions
 def normalize_target_value(value):
-    """
-    Convert the target labels to consistent strings.
 
-    Your y_train.csv and y_test.csv currently use:
-        0 = no
-        1 = yes
-
-    This function also works if the target is already yes/no.
-    """
-
+    # normalize representations of yes/true/anomalous and no/false/normal to "yes" and "no"
     value_str = str(value).strip().lower()
-
     if value_str in {"1", "yes", "true", "anomalous"}:
         return "yes"
     if value_str in {"0", "no", "false", "normal"}:
@@ -79,7 +70,7 @@ def normalize_target_value(value):
 
     return value_str
 
-
+# helper function to load data, merge X and y, and convert all columns to strings for pgmpy
 def load_data():
     X_train = pd.read_csv(X_TRAIN_PATH)
     X_test = pd.read_csv(X_TEST_PATH)
@@ -92,8 +83,8 @@ def load_data():
     train_df["anomalous"] = y_train.apply(normalize_target_value)
     test_df["anomalous"] = y_test.apply(normalize_target_value)
 
-    # pgmpy works best with discrete/categorical variables.
-    # Convert everything to strings so states are consistent.
+    # pgmpy works best with discrete/categorical variables
+    # convert everything to strings so states are consistent
     for col in train_df.columns:
         train_df[col] = train_df[col].astype(str)
 
@@ -104,13 +95,12 @@ def load_data():
 
 
 def get_probability_of_yes(query_result):
-    """
-    Extract P(anomalous = yes) from pgmpy's query result.
-    """
-
+    # extract P(anomalous = yes) from pgmpy's query result.
+    
     states = list(query_result.state_names["anomalous"])
     values = query_result.values
 
+    # find index of "yes" or "1" in states to get the corresponding probability value
     if "yes" in states:
         yes_index = states.index("yes")
     elif "1" in states:
@@ -123,13 +113,13 @@ def get_probability_of_yes(query_result):
     return float(values[yes_index])
 
 EDGES = [
-    # Dependencies among red flags
+    # dependencies among red flags
     ("new_vendor", "missing_po"),
     ("manual_entry", "entered_after_hrs"),
     ("manual_entry", "duplicate_entry"),
     ("manual_entry", "desc_quality"),
 
-    # Red flags that directly influence anomalous risk
+    # red flags that directly influence anomalous risk
     ("amt_deviation", "anomalous"),
     ("duplicate_entry", "anomalous"),
     ("new_vendor", "anomalous"),
@@ -142,10 +132,8 @@ EDGES = [
 
 
 def build_and_train_bayesian_network(train_df):
-    """
-    Build a Bayesian Network and learn its conditional probability tables.
-    """
-
+    # build a Bayesian Network and learn its conditional probability tables.
+    
     model = BayesianNetworkModel(EDGES)
 
     model_columns = list(model.nodes())
@@ -153,6 +141,7 @@ def build_and_train_bayesian_network(train_df):
 
     estimator = BayesianEstimator(model, train_model_df)
 
+    # use BDeu prior with equivalent sample size of 10 to learn CPDs
     cpds = estimator.get_parameters(
         prior_type="BDeu",
         equivalent_sample_size=10,
@@ -165,12 +154,10 @@ def build_and_train_bayesian_network(train_df):
 
 
 def predict_with_bayesian_network(model, test_df):
-    """
-    Predict P(anomalous = yes | observed red flags) for each test row.
-    """
-
+    # predict P(anomalous = yes | observed red flags) for each test row.
     inference = VariableElimination(model)
 
+    # grab all columns except the target "anomalous" as evidence columns
     evidence_columns = [
         col for col in model.nodes()
         if col != "anomalous"
@@ -178,7 +165,7 @@ def predict_with_bayesian_network(model, test_df):
 
     probabilities = []
 
-    # Cache repeated red-flag combinations so prediction runs faster.
+    # cache repeated red-flag combinations so prediction runs faster
     probability_cache = {}
 
     for _, row in test_df.iterrows():
@@ -188,8 +175,7 @@ def predict_with_bayesian_network(model, test_df):
             if col in test_df.columns
         }
 
-        # Remove evidence values that the model has never seen during training.
-        # This makes the model more robust to unknown categories.
+        # remove evidence values that the model has never seen during training
         safe_evidence = {}
         for col, value in evidence.items():
             cpd = model.get_cpds(col)
@@ -199,6 +185,7 @@ def predict_with_bayesian_network(model, test_df):
 
         cache_key = tuple(sorted(safe_evidence.items()))
 
+        # if we've already computed probability for this combination, use cached value
         if cache_key not in probability_cache:
             query_result = inference.query(
                 variables=["anomalous"],
@@ -213,10 +200,7 @@ def predict_with_bayesian_network(model, test_df):
 
 
 def save_model_outputs(model, test_df, anomaly_probabilities):
-    """
-    Save metrics, predictions, network edges, and learned CPDs.
-    """
-
+    # save metrics, predictions, network edges, and learned CPDs.
     y_true_labels = test_df["anomalous"].values
     y_true = np.array([1 if label == "yes" else 0 for label in y_true_labels])
 
@@ -227,6 +211,7 @@ def save_model_outputs(model, test_df, anomaly_probabilities):
     recall = recall_score(y_true, y_pred, zero_division=0)
     f1 = f1_score(y_true, y_pred, zero_division=0)
 
+    # handle cases where only one class is present in y_true
     try:
         roc_auc = roc_auc_score(y_true, anomaly_probabilities)
     except ValueError:
@@ -239,15 +224,15 @@ def save_model_outputs(model, test_df, anomaly_probabilities):
 
     cm = confusion_matrix(y_true, y_pred)
 
-    # Save predictions
+    # save predictions
     predictions_df = test_df.copy()
     predictions_df["true_anomalous_binary"] = y_true
     predictions_df["predicted_anomalous_binary"] = y_pred
     predictions_df["anomaly_probability"] = anomaly_probabilities
-    predictions_df.to_csv("output/bayesian_network_predictions.csv", index=False)
+    predictions_df.to_csv("outputs/network_output/bayesian_network_predictions.csv", index=False)
 
-    # Save metrics report
-    with open("output/bayesian_network_metrics.txt", "w") as f:
+    # save metrics report
+    with open("outputs/network_output/bayesian_network_metrics.txt", "w") as f:
         f.write("Bayesian Network Metrics\n")
         f.write("------------------------\n")
         f.write(f"Accuracy: {accuracy:.4f}\n")
@@ -259,20 +244,22 @@ def save_model_outputs(model, test_df, anomaly_probabilities):
         f.write("\nConfusion Matrix:\n")
         f.write(str(cm))
 
-    # Save network edges
+    # save network edges
     edges_df = pd.DataFrame(list(model.edges()), columns=["parent", "child"])
-    edges_df.to_csv("output/bayesian_network_edges.csv", index=False)
+    edges_df.to_csv("outputs/network_output/bayesian_network_edges.csv", index=False)
 
-    # Save CPDs as readable text
-    with open("output/bayesian_network_cpds.txt", "w") as f:
+    # save CPDs as readable text
+    with open("outputs/network_output/bayesian_network_cpds.txt", "w") as f:
         for cpd in model.get_cpds():
             f.write(str(cpd))
             f.write("\n\n")
 
-    # Save model as pickle
+    # save model as pickle
+    # pickle is a python library that allows us to save a model to an object
     with open("data/bayesian_network_model.pkl", "wb") as f:
         pickle.dump(model, f)
 
+    # build graph visualization of the Bayesian Network structure and save as image
     try:
         import matplotlib.pyplot as plt
         import networkx as nx
@@ -295,26 +282,26 @@ def save_model_outputs(model, test_df, anomaly_probabilities):
 
         plt.title("Bayesian Network Structure: Dependencies Among Red Flags")
         plt.tight_layout()
-        plt.savefig("output/bayesian_network_structure.png", dpi=300)
+        plt.savefig("outputs/network_output/bayesian_network_structure.png", dpi=300)
         plt.close()
 
     except Exception as exc:
         print(f"Could not save graph image: {exc}")
 
     print("\nEvaluation complete.")
-    print(f"Accuracy:  {accuracy:.4f}")
+    print(f"Accuracy: {accuracy:.4f}")
     print(f"Precision: {precision:.4f}")
-    print(f"Recall:    {recall:.4f}")
-    print(f"F1-score:  {f1:.4f}")
-    print(f"ROC-AUC:   {roc_auc:.4f}")
-    print(f"PR-AUC:    {pr_auc:.4f}")
+    print(f"Recall: {recall:.4f}")
+    print(f"F1-score: {f1:.4f}")
+    print(f"ROC-AUC: {roc_auc:.4f}")
+    print(f"PR-AUC: {pr_auc:.4f}")
 
     print("\nSaved:")
-    print("- output/bayesian_network_metrics.txt")
-    print("- output/bayesian_network_predictions.csv")
-    print("- output/bayesian_network_edges.csv")
-    print("- output/bayesian_network_cpds.txt")
-    print("- output/bayesian_network_structure.png")
+    print("- outputs/network_output/bayesian_network_metrics.txt")
+    print("- outputs/network_output/bayesian_network_predictions.csv")
+    print("- outputs/network_output/bayesian_network_edges.csv")
+    print("- outputs/network_output/bayesian_network_cpds.txt")
+    print("- outputs/network_output/bayesian_network_structure.png")
     print("- data/bayesian_network_model.pkl")
 
 
