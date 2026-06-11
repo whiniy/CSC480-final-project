@@ -154,7 +154,6 @@ def evaluate_from_predictions(csv_path, label_col, score_col, pred_col=None, thr
     pr_auc = average_precision_score(y_true, y_score)
 
     print("Bayesian Network Metrics")
-    print("------------------------")
     print(f"Accuracy:  {accuracy:.4f}")
     print(f"Precision: {precision:.4f}")
     print(f"Recall:    {recall:.4f}")

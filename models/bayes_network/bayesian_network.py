@@ -234,7 +234,6 @@ def save_model_outputs(model, test_df, anomaly_probabilities):
     # save metrics report
     with open("outputs/network_output/bayesian_network_metrics.txt", "w") as f:
         f.write("Bayesian Network Metrics\n")
-        f.write("------------------------\n")
         f.write(f"Accuracy: {accuracy:.4f}\n")
         f.write(f"Precision: {precision:.4f}\n")
         f.write(f"Recall: {recall:.4f}\n")
