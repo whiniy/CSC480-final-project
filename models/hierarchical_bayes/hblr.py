@@ -14,6 +14,7 @@ from pyro.infer.autoguide import AutoNormal
 from pyro.infer import SVI, Trace_ELBO, Predictive
 from pyro.optim import Adam
 
+# preprocessing
 X_train = pd.read_csv("data/X_train.csv")
 X_test = pd.read_csv("data/X_test.csv")
 y_train = pd.read_csv("data/y_train.csv")["anomalous"]
@@ -54,6 +55,7 @@ num_vendors = len(vendor_encoder.classes_)
 y_train_arr = y_train.to_numpy()
 y_test_arr = y_test.to_numpy()
 
+# convert data to torch tensors
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 X_train_tensor = torch.tensor(X_train_encoded, dtype=torch.float32, device=device)
@@ -67,6 +69,7 @@ y_test_tensor = torch.tensor(y_test_arr, dtype=torch.float32, device=device)
 
 num_features = X_train_encoded.shape[1]
 
+# model definition
 def model(X, vendor_idx, y=None, num_vendors=None):
     N, P = X.shape
 
